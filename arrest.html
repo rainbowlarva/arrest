@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Arrest Report Generator</title>
+  <style>
+    /* ======== Basic Layout ======== */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #212121;
+      color: #f2f2f2;
+      display: flex;
+      height: 100vh;
+    }
+    /* Sidebar for saved reports */
+    .sidebar {
+      width: 250px;
+      background-color: #2A2E33;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    .sidebar h2 {
+      color: #E2B055;
+      margin-top: 0;
+    }
+    .report-item {
+      background-color: #3C4349;
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .report-item:hover {
+      background-color: #545B60;
+    }
+
+    /* Main content for the form + snippet */
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .main-content h1 {
+      text-align: center;
+      color: #E2B055;
+      margin-top: 0;
+    }
+
+    /* Form styling */
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 20px;
+      margin-bottom: 20px;
+    }
+    form label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: bold;
+      color: #f2f2f2;
+    }
+    form input, form textarea {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #545454;
+      background-color: #5D6770;
+      border-radius: 5px;
+      color: #fff;
+    }
+    textarea {
+      resize: vertical;
+    }
+    .full-width {
+      grid-column: 1 / 3;
+    }
+    .button-row {
+      grid-column: 1 / 3;
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    button {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      background-color: #0C7A87;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0A4C54;
+    }
+    .clear-button {
+      background-color: #E73E3B;
+    }
+    .clear-button:hover {
+      background-color: #B8322F;
+    }
+
+    /* The snippet container is hidden, we only use it to generate HTML to copy. */
+    #snippetContainer {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======== SIDEBAR ======== -->
+  <div class="sidebar">
+    <h2>Saved Reports</h2>
+    <div id="reportsList"></div>
+  </div>
+
+  <!-- ======== MAIN CONTENT ======== -->
+  <div class="main-content">
+    <h1>Arrest Report Generator</h1>
+
+    <!-- The Form -->
+    <form id="arrestForm">
+      <!-- Row 1 -->
+      <div>
+        <label>Arrestee Name (First, Middle, Last)</label>
+        <input type="text" id="arresteeName" placeholder="John M. Doe">
+      </div>
+      <div>
+        <label>Sex (M/F/O)</label>
+        <input type="text" id="sex" placeholder="M">
+      </div>
+
+      <!-- Row 2 -->
+      <div>
+        <label>Hair</label>
+        <input type="text" id="hair" placeholder="Brown">
+      </div>
+      <div>
+        <label>Eyes</label>
+        <input type="text" id="eyes" placeholder="Blue">
+      </div>
+
+      <!-- Row 3 -->
+      <div>
+        <label>Residence</label>
+        <input type="text" id="residence" placeholder="123 Main St">
+      </div>
+      <div>
+        <label>Age</label>
+        <input type="text" id="age" placeholder="28">
+      </div>
+
+      <!-- Row 4 -->
+      <div>
+        <label>Height</label>
+        <input type="text" id="height" placeholder="5'10">
+      </div>
+      <div>
+        <label>Descent</label>
+        <input type="text" id="descent" placeholder="Caucasian">
+      </div>
+
+      <!-- Row 5 -->
+      <div>
+        <label>Clothing</label>
+        <input type="text" id="clothing" placeholder="White T-Shirt, Jeans">
+      </div>
+      <div>
+        <label>Personal Oddities</label>
+        <input type="text" id="oddities" placeholder="Tattoos, scars...">
+      </div>
+
+      <!-- Row 6 -->
+      <div>
+        <label>Moniker / Alias</label>
+        <input type="text" id="alias" placeholder="Alias or Nickname">
+      </div>
+      <div>
+        <label>Gang / Club</label>
+        <input type="text" id="gangClub" placeholder="Gang or Club name">
+      </div>
+
+      <!-- Persons with Subject (3 lines) -->
+      <div class="full-width">
+        <label>Persons with Subject (One per line)</label>
+        <textarea id="persons" rows="3" placeholder="Name1 (Sex) (Gang/Moniker)\nName2 (Sex) (Gang/Moniker)"></textarea>
+      </div>
+
+      <!-- Row: Date, Time, Location -->
+      <div>
+        <label>Date</label>
+        <input type="text" id="date" placeholder="DD/MMM/YYYY">
+      </div>
+      <div>
+        <label>Time</label>
+        <input type="text" id="time" placeholder="HH:MM">
+      </div>
+      <div class="full-width">
+        <label>Arrest / Incident Location</label>
+        <input type="text" id="incidentLocation" placeholder="Location details">
+      </div>
+
+      <!-- Row: Officer, Serial, Callsign, Div/Detail -->
+      <div>
+        <label>Officer</label>
+        <input type="text" id="officer" placeholder="J. Smith">
+      </div>
+      <div>
+        <label>Serial No.</label>
+        <input type="text" id="serialNo" placeholder="12345">
+      </div>
+      <div>
+        <label>Callsign</label>
+        <input type="text" id="callsign" placeholder="2L10">
+      </div>
+      <div>
+        <label>Division / Detail</label>
+        <input type="text" id="divisionDetail" placeholder="GED / Metro / etc.">
+      </div>
+
+      <!-- Row: Source of Activity, Investigation, Arrest, etc. -->
+      <div class="full-width">
+        <label>Source of Activity</label>
+        <textarea id="sourceOfActivity" rows="2" placeholder="Radio call, self-initiated, etc."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Investigation</label>
+        <textarea id="investigation" rows="2" placeholder="What was discovered, etc."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Arrest</label>
+        <textarea id="arrestInfo" rows="2" placeholder="How the arrest was carried out."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Photographs / Videos / Digital Imaging</label>
+        <textarea id="photographs" rows="2" placeholder="Any photo/video evidence."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Booking</label>
+        <textarea id="booking" rows="2" placeholder="Where was suspect booked, booking #, etc."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Physical Evidence</label>
+        <textarea id="physicalEvidence" rows="2" placeholder="List items found, how they were seized."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Court Information</label>
+        <textarea id="courtInfo" rows="2" placeholder="Arraignment date, court location, etc."></textarea>
+      </div>
+      <div class="full-width">
+        <label>Additional</label>
+        <textarea id="additional" rows="2" placeholder="Any extra notes."></textarea>
+      </div>
+
+      <!-- Buttons -->
+      <div class="button-row">
+        <button type="button" id="saveButton">Save Report</button>
+        <button type="submit" id="copyButton">Copy HTML</button>
+        <button type="button" id="clearButton" class="clear-button">Clear Form</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Hidden snippet container (we fill it to generate HTML to copy) -->
+  <div id="snippetContainer">
+    <!-- This is the snippet from arrest.html, but with IDs for each cell -->
+    <div style="padding: 2px; border: 1px solid #000; background-color: white; width: 100%; max-width: 210mm; color: black; font-family: Arial, sans-serif;">
+      <h1 style="text-align: center; font-size: 16px; font-weight: bold; margin-top: 10px;">LOS SANTOS POLICE DEPARTMENT<br>ARREST REPORT</h1>
+      <table border="1" cellpadding="2" style="width:100%; border-collapse: collapse; color: black;">
+        <!-- Row 1 -->
+        <tr>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">
+            ARRESTEE NAME (FIRST, MIDDLE, LAST)
+          </th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">SEX (M/F/O)</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">HAIR</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">EYES</th>
+        </tr>
+        <tr>
+          <td colspan="2" id="tdArresteeName" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdSex" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdHair" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdEyes" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Row 2 -->
+        <tr>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">RESIDENCE</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">AGE</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">HEIGHT</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">DESCENT</th>
+        </tr>
+        <tr>
+          <td colspan="2" id="tdResidence" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdAge" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdHeight" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdDescent" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Row 3 -->
+        <tr>
+          <th colspan="3" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">CLOTHING</th>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">PERSONAL ODDITIES</th>
+        </tr>
+        <tr>
+          <td colspan="3" id="tdClothing" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="2" id="tdOddities" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Row 4 -->
+        <tr>
+          <th colspan="3" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">MONIKER / ALIAS</th>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">GANG / CLUB</th>
+        </tr>
+        <tr>
+          <td colspan="3" id="tdAlias" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="2" id="tdGangClub" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Persons with Subject -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; border-top: 2px solid black; background-color: white;">
+            PERSONS WITH SUBJECT
+          </th>
+        </tr>
+        <tr>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">NAME (FIRST, MIDDLE, LAST)</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">SEX (M/F/O)</th>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">GANG / MONIKER</th>
+        </tr>
+        <!-- We'll just fill 3 rows max, or less if blank -->
+        <tr id="pwsRow1">
+          <td colspan="2" id="pws1Name" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="pws1Sex" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="2" id="pws1Gang" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+        <tr id="pwsRow2">
+          <td colspan="2" id="pws2Name" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="pws2Sex" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="2" id="pws2Gang" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+        <tr id="pwsRow3">
+          <td colspan="2" id="pws3Name" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="pws3Sex" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="2" id="pws3Gang" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Date, Time, Location -->
+        <tr>
+          <th style="font-weight: bold; font-size: 10px; text-transform: uppercase; border-bottom: none; border-top: 2px solid black; background-color: white;">DATE</th>
+          <th style="font-weight: bold; font-size: 10px; text-transform: uppercase; border-bottom: none; border-top: 2px solid black; background-color: white;">TIME</th>
+          <th colspan="3" style="font-weight: bold; text-transform: uppercase; font-size: 10px; border-bottom: none; border-top: 2px solid black; background-color: white;">
+            LOCATION
+          </th>
+        </tr>
+        <tr>
+          <td id="tdDate" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;">INVALID/DATE</td>
+          <td id="tdTime" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="3" id="tdIncidentLocation" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Officer, Serial, Callsign, Div/Detail -->
+        <tr>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">OFFICER</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">SERIAL NO.</th>
+          <th style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">CALLSIGN</th>
+          <th colspan="2" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">DIV / DETAIL</th>
+        </tr>
+        <tr>
+          <td id="tdOfficer" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdSerialNo" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td id="tdCallsign" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+          <td colspan="2" id="tdDivisionDetail" style="font-size: 14px; text-transform: uppercase; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Source of Activity -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-top: 2px solid black; border-bottom: none; background-color: white;">
+            SOURCE OF ACTIVITY
+          </th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdSourceOfActivity" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Investigation -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">INVESTIGATION</th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdInvestigation" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Arrest -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">ARREST</th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdArrest" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Photographs, Videos, etc. -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">
+            PHOTOGRAPHS, VIDEOS, IN-CAR VIDEO (DICV), AND DIGITAL IMAGING
+          </th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdPhotographs" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Booking -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">BOOKING</th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdBooking" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Physical Evidence -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">PHYSICAL EVIDENCE</th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdPhysicalEvidence" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Court Info -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">COURT INFORMATION</th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdCourtInfo" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+
+        <!-- Additional -->
+        <tr>
+          <th colspan="5" style="font-weight: bold; font-size: 10px; border-bottom: none; background-color: white;">ADDITIONAL</th>
+        </tr>
+        <tr>
+          <td colspan="5" id="tdAdditional" style="font-size: 14px; border-top: none; color: black;"></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // We'll store the saved reports in localStorage under "arrestReports"
+    let arrestReports = [];
+
+    function loadReportsFromStorage() {
+      const stored = localStorage.getItem('arrestReports');
+      if (stored) {
+        arrestReports = JSON.parse(stored);
+      } else {
+        arrestReports = [];
+      }
+    }
+
+    function saveReportsToStorage() {
+      localStorage.setItem('arrestReports', JSON.stringify(arrestReports));
+    }
+
+    function updateReportsList() {
+      const listDiv = document.getElementById('reportsList');
+      listDiv.innerHTML = '';
+      arrestReports.forEach((report, index) => {
+        const div = document.createElement('div');
+        div.className = 'report-item';
+        // We'll label it with "Arrestee Name - Date"
+        div.textContent = report.arresteeName + ' - ' + report.date;
+        div.onclick = () => {
+          loadReportIntoForm(index);
+        };
+        listDiv.appendChild(div);
+      });
+    }
+
+    function getFormData() {
+      return {
+        arresteeName:  document.getElementById('arresteeName').value.trim(),
+        sex:           document.getElementById('sex').value.trim(),
+        hair:          document.getElementById('hair').value.trim(),
+        eyes:          document.getElementById('eyes').value.trim(),
+        residence:     document.getElementById('residence').value.trim(),
+        age:           document.getElementById('age').value.trim(),
+        height:        document.getElementById('height').value.trim(),
+        descent:       document.getElementById('descent').value.trim(),
+        clothing:      document.getElementById('clothing').value.trim(),
+        oddities:      document.getElementById('oddities').value.trim(),
+        alias:         document.getElementById('alias').value.trim(),
+        gangClub:      document.getElementById('gangClub').value.trim(),
+        persons:       document.getElementById('persons').value.trim(), // multiline
+        date:          document.getElementById('date').value.trim(),
+        time:          document.getElementById('time').value.trim(),
+        incidentLocation: document.getElementById('incidentLocation').value.trim(),
+        officer:       document.getElementById('officer').value.trim(),
+        serialNo:      document.getElementById('serialNo').value.trim(),
+        callsign:      document.getElementById('callsign').value.trim(),
+        divisionDetail:document.getElementById('divisionDetail').value.trim(),
+        sourceOfActivity: document.getElementById('sourceOfActivity').value.trim(),
+        investigation: document.getElementById('investigation').value.trim(),
+        arrestInfo:    document.getElementById('arrestInfo').value.trim(),
+        photographs:   document.getElementById('photographs').value.trim(),
+        booking:       document.getElementById('booking').value.trim(),
+        physicalEvidence: document.getElementById('physicalEvidence').value.trim(),
+        courtInfo:     document.getElementById('courtInfo').value.trim(),
+        additional:    document.getElementById('additional').value.trim()
+      };
+    }
+
+    function setFormData(data) {
+      document.getElementById('arresteeName').value = data.arresteeName || '';
+      document.getElementById('sex').value = data.sex || '';
+      document.getElementById('hair').value = data.hair || '';
+      document.getElementById('eyes').value = data.eyes || '';
+      document.getElementById('residence').value = data.residence || '';
+      document.getElementById('age').value = data.age || '';
+      document.getElementById('height').value = data.height || '';
+      document.getElementById('descent').value = data.descent || '';
+      document.getElementById('clothing').value = data.clothing || '';
+      document.getElementById('oddities').value = data.oddities || '';
+      document.getElementById('alias').value = data.alias || '';
+      document.getElementById('gangClub').value = data.gangClub || '';
+      document.getElementById('persons').value = data.persons || '';
+      document.getElementById('date').value = data.date || '';
+      document.getElementById('time').value = data.time || '';
+      document.getElementById('incidentLocation').value = data.incidentLocation || '';
+      document.getElementById('officer').value = data.officer || '';
+      document.getElementById('serialNo').value = data.serialNo || '';
+      document.getElementById('callsign').value = data.callsign || '';
+      document.getElementById('divisionDetail').value = data.divisionDetail || '';
+      document.getElementById('sourceOfActivity').value = data.sourceOfActivity || '';
+      document.getElementById('investigation').value = data.investigation || '';
+      document.getElementById('arrestInfo').value = data.arrestInfo || '';
+      document.getElementById('photographs').value = data.photographs || '';
+      document.getElementById('booking').value = data.booking || '';
+      document.getElementById('physicalEvidence').value = data.physicalEvidence || '';
+      document.getElementById('courtInfo').value = data.courtInfo || '';
+      document.getElementById('additional').value = data.additional || '';
+    }
+
+    function loadReportIntoForm(index) {
+      const report = arrestReports[index];
+      setFormData(report);
+    }
+
+    function saveReport() {
+      const data = getFormData();
+      // We'll label the report with data.arresteeName + ' - ' + data.date
+      // Or we can store the entire object
+      arrestReports.push(data);
+      saveReportsToStorage();
+      updateReportsList();
+      alert('Report saved!');
+    }
+
+    function fillSnippetAndCopy() {
+      // Grab data
+      const data = getFormData();
+
+      // Fill each cell in the snippet
+      document.getElementById('tdArresteeName').textContent = data.arresteeName;
+      document.getElementById('tdSex').textContent = data.sex;
+      document.getElementById('tdHair').textContent = data.hair;
+      document.getElementById('tdEyes').textContent = data.eyes;
+      document.getElementById('tdResidence').textContent = data.residence;
+      document.getElementById('tdAge').textContent = data.age;
+      document.getElementById('tdHeight').textContent = data.height;
+      document.getElementById('tdDescent').textContent = data.descent;
+      document.getElementById('tdClothing').textContent = data.clothing;
+      document.getElementById('tdOddities').textContent = data.oddities;
+      document.getElementById('tdAlias').textContent = data.alias;
+      document.getElementById('tdGangClub').textContent = data.gangClub;
+
+      // Persons with subject (split lines)
+      const lines = data.persons.split('\n').filter(l => l.trim() !== '');
+      // We have pwsRow1, pwsRow2, pwsRow3
+      // Each row has pwsXName, pwsXSex, pwsXGang. We'll parse the line?
+      // If user typed "John Doe (M) (Gangster)", we can do a naive parse or let them do it manually. 
+      // We'll do a naive approach: 
+      // We'll assume "Name (Sex) (Gang)" => we can parse, or just split by parentheses? 
+      // For simplicity, let's do a naive approach:
+      function fillPws(rowId, line) {
+        // We'll do a simple parse: "Name (M) (Alias)" => name, sex, gang
+        // or user can do anything. We'll just parse or if fails, we put everything in name. 
+        const nameRegex = /^(.*?)\s*\((.*?)\)\s*\((.*?)\)\s*$/;
+        const match = line.match(nameRegex);
+        if (match) {
+          document.getElementById(rowId+'Name').textContent = match[1];
+          document.getElementById(rowId+'Sex').textContent  = match[2];
+          document.getElementById(rowId+'Gang').textContent = match[3];
+        } else {
+          // fallback: put entire line in name
+          document.getElementById(rowId+'Name').textContent = line;
+          document.getElementById(rowId+'Sex').textContent  = '';
+          document.getElementById(rowId+'Gang').textContent = '';
+        }
+      }
+      // Clear rows first
+      ['pwsRow1','pwsRow2','pwsRow3'].forEach(row => {
+        document.getElementById(row+'Name').textContent = '';
+        document.getElementById(row+'Sex').textContent  = '';
+        document.getElementById(row+'Gang').textContent = '';
+      });
+      // Fill up to 3 lines
+      if (lines[0]) fillPws('pws1', lines[0]);
+      if (lines[1]) fillPws('pws2', lines[1]);
+      if (lines[2]) fillPws('pws3', lines[2]);
+
+      // Date, time, location
+      document.getElementById('tdDate').textContent = data.date || 'INVALID/DATE';
+      document.getElementById('tdTime').textContent = data.time;
+      document.getElementById('tdIncidentLocation').textContent = data.incidentLocation;
+
+      // Officer, serial, callsign, div
+      document.getElementById('tdOfficer').textContent = data.officer;
+      document.getElementById('tdSerialNo').textContent = data.serialNo;
+      document.getElementById('tdCallsign').textContent = data.callsign;
+      document.getElementById('tdDivisionDetail').textContent = data.divisionDetail;
+
+      // Source of Activity
+      document.getElementById('tdSourceOfActivity').textContent = data.sourceOfActivity;
+      // Investigation
+      document.getElementById('tdInvestigation').textContent = data.investigation;
+      // Arrest
+      document.getElementById('tdArrest').textContent = data.arrestInfo;
+      // Photographs
+      document.getElementById('tdPhotographs').textContent = data.photographs;
+      // Booking
+      document.getElementById('tdBooking').textContent = data.booking;
+      // Physical Evidence
+      document.getElementById('tdPhysicalEvidence').textContent = data.physicalEvidence;
+      // Court Info
+      document.getElementById('tdCourtInfo').textContent = data.courtInfo;
+      // Additional
+      document.getElementById('tdAdditional').textContent = data.additional;
+
+      // Now copy #snippetContainer's innerHTML to clipboard
+      const snippetDiv = document.getElementById('snippetContainer');
+      const htmlToCopy = snippetDiv.innerHTML;
+
+      // Create a temporary element to copy from
+      const tempElem = document.createElement('textarea');
+      tempElem.value = htmlToCopy;
+      document.body.appendChild(tempElem);
+      tempElem.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempElem);
+
+      alert('HTML copied to clipboard!');
+    }
+
+    // On DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      loadReportsFromStorage();
+      updateReportsList();
+
+      // Form references
+      const arrestForm = document.getElementById('arrestForm');
+      const saveButton = document.getElementById('saveButton');
+      const copyButton = document.getElementById('copyButton');
+      const clearButton= document.getElementById('clearButton');
+
+      // "Save Report"
+      saveButton.addEventListener('click', () => {
+        const data = getFormData();
+        // We'll label the report with data.arresteeName + ' - ' + data.date
+        arrestReports.push(data);
+        saveReportsToStorage();
+        updateReportsList();
+        alert('Report saved!');
+      });
+
+      // "Copy HTML" => fill snippet + copy
+      arrestForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        fillSnippetAndCopy();
+      });
+
+      // "Clear Form"
+      clearButton.addEventListener('click', () => {
+        arrestForm.reset();
+      });
+    });
+  </script>
+</body>
+</html>
